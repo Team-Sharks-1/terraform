@@ -1,0 +1,93 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm ci
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test
+    
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+    
+    - name: Build backend
+      run: |
+        cd backend
+        npm run build
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: 'Azure login'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: 'Build and push image to ACR'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    
+    - run: |
+        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }} frontend/.
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
+        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/backend:${{ github.sha }} backend/.
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/backend:${{ github.sha }}
+    
+    - name: 'Deploy to Azure Kubernetes Service'
+      uses: azure/k8s-deploy@v1
+      with:
+        manifests: |
+          kubernetes/deployment.yml
+          kubernetes/service.yml
+        images: |
+          ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
+          ${{ secrets.REGISTRY_LOGIN_SERVER }}/backend:${{ github.sha }}
+        namespace: default
+
+# To use this workflow in VSCode:
+# 1. Ensure you've created the .github/workflows folder in your project
+# 2. Create a new file named ci-cd.yml in the workflows folder
+# 3. Paste this entire content into that file
+# 4. Save the file
+# 5. Commit and push to GitHub to activate the workflow
