@@ -34,7 +34,7 @@ tf apply -auto-approve  # Apply the changes automatically
 Once your infrastructure is set up, you can SSH into your Ansible VM using:
 
 ```bash
-ssh -i C:\Users\arman\.ssh\id_rsa adminuser@20.169.235.141
+ssh -i C:\Users\arman\.ssh\id_rsa adminuser@52.226.166.251
 ```
 
 Make sure to check the output from Terraform to confirm the IP address, and update your inventory file accordingly to match the Ansible VM's IP.
@@ -48,7 +48,7 @@ To prepare your Ansible environment, you'll need to copy your SSH key and playbo
 Transfer your Ansible playbooks with the following command:
 
 ```bash
-scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\OneDrive\Desktop\Ansible/* adminuser@20.169.235.141:~/ansible
+scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\OneDrive\Desktop\Ansible/* adminuser@52.226.166.251:~/ansible
 ```
 
 ### Copy SSH Key
@@ -56,7 +56,7 @@ scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\OneDrive\Desktop\Ansible/* a
 To copy your SSH key, run:
 
 ```bash
-scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\.ssh/* adminuser@20.169.235.141:~/ansible
+scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\.ssh/* adminuser@52.226.166.251:~/ansible
 ```
 
 ## Step 6: Running the Ansible Playbook
@@ -64,7 +64,7 @@ scp -i C:\Users\arman\.ssh\id_rsa -r C:\Users\arman\.ssh/* adminuser@20.169.235.
 After copying the necessary files, SSH back into your Ansible VM:
 
 ```bash
-ssh -i C:\Users\arman\.ssh\id_rsa adminuser@20.169.235.141
+ssh -i C:\Users\arman\.ssh\id_rsa adminuser@52.226.166.251
 ```
 
 Navigate to the Ansible directory:
